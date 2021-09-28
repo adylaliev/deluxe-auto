@@ -62,3 +62,10 @@ class Comment(models.Model):
 
     def __str__(self):
         return f'{self.product} --> {self.user}'
+
+
+class Likes(models.Model):
+    liked = models.ForeignKey(Product, on_delete=models.CASCADE,
+                                  related_name='ads_likes')
+    author = models.ForeignKey(User, on_delete=models.CASCADE,
+                               related_name='author_likes')

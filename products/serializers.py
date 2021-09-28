@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from products.models import Product, Comment
+from products.models import Product, Comment, Likes
 
 
 class ProductListSerializer(serializers.ModelSerializer):
@@ -57,3 +57,20 @@ class CreateProductSerializer(serializers.ModelSerializer):
         validated_data['user'] = request.user
         return super().create(validated_data)
 
+
+class LikeSerializer(serializers.ModelSerializer):
+    author = serializers.ReadOnlyField(source='author.email')
+
+    class Meta:
+        model = Likes
+        fields = '__all__'
+
+    def create(self, validated_data):
+        request = self.context.get('request')
+        user = request.user
+        ads = validated_data.get('ads')
+
+        if Likes.objects.filter(author=user, ads=ads):
+            return Likes.objects.get(author=user, ads=ads)
+        else:
+            return Likes.objects.create(author=user, ads=ads)

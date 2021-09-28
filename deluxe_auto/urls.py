@@ -20,23 +20,41 @@ from django.urls import path, include
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from rest_framework import permissions
+from rest_framework.routers import DefaultRouter
+
+from account.views import RegistrationView, ActivationView, LoginView, LogOutView, ForgotPasswordView, \
+    ForgotPasswordCompleteView, ChangePasswordView
+from orders.views import PurchasesView
+from products.views import ProductViewSet, CommentViewSet, LikesView
+
+router = DefaultRouter()
+router.register('product', ProductViewSet, 'products')
+router.register('comments', CommentViewSet, 'comments')
+router.register('likes', LikesView, 'likes')
+router.register('rating', PurchasesView, 'rating')
 
 schema_view = get_schema_view(
     openapi.Info(
-        title="Blog",
-        default_version='v1',
-        description="Test description",
-        terms_of_service="https://www.ourapp.com/policies/terms/",
-        contact=openapi.Contact(email="asylbekegeshov@gmail.com"),
-        license=openapi.License(name="Test License"),
-    ),
+          title="Snippets API",
+          default_version='v1',
+          description="Test description",
+          terms_of_service="https://www.google.com/policies/terms/",
+          contact=openapi.Contact(email="contact@snippets.local"),
+          license=openapi.License(name="BSD License"),
+       ),
     public=True,
-    permission_classes=(permissions.AllowAny,),
 )
 
 urlpatterns = [
+    path('api/v1/docs/', schema_view.with_ui()),
     path('admin/', admin.site.urls),
-    path('account/', include('account.urls')),
-    path('', include('products.urls')),
-    path('docs/', schema_view.with_ui()),
+    path('registration/', RegistrationView.as_view(), name='регистрация-аккаунта'),
+    path('activate/', ActivationView.as_view(), name='аккаунт-активирован'),
+    path('login/', LoginView.as_view(), name='авторизация'),
+    path('logout/', LogOutView.as_view()),
+    path('forgot_password/', ForgotPasswordView.as_view()),
+    path('forgot_password/complete/', ForgotPasswordCompleteView.as_view()),
+    path('change_password', ChangePasswordView.as_view()),
+    path('', include(router.urls))
+
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

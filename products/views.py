@@ -1,13 +1,16 @@
 from django.shortcuts import render
+
 from django_filters import rest_framework as filters
+from requests import Response
 from rest_framework import viewsets
+from rest_framework.decorators import action
 from rest_framework.generics import *
-from rest_framework.viewsets import GenericViewSet
+from rest_framework.viewsets import GenericViewSet, ModelViewSet
 from rest_framework.permissions import IsAuthenticated
-from products.models import Product, Comment
+from products.models import Product, Comment, Likes
 from products.permissions import IsAuthorOrIsAdmin, IsAuthor
 from products.serializers import CreateProductSerializer, ProductListSerializer, ProductDetailSerializer, \
-    CommentSerializer
+    CommentSerializer, LikeSerializer
 from rest_framework import filters as rest_filters
 
 
@@ -71,3 +74,15 @@ class CommentViewSet(mixins.CreateModelMixin,
             return [IsAuthenticated()]
         return [IsAuthor()]
 
+
+class LikesView(ModelViewSet):
+    queryset = Likes.objects.all()
+    serializer_class = LikeSerializer
+
+    @action(detail=False, methods=['get'])
+    def favorite(self, request, pk=None):
+        queryset = self.get_queryset()
+        queryset = queryset.filter(author=request.user)
+        serializer = LikeSerializer(queryset, many=True,
+                                    context={'request': request})
+        return Response(serializer.data, status=200)
