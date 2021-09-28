@@ -1,7 +1,9 @@
 from django.db import models
-
+from django.contrib.auth import get_user_model
 # Create your models here.
-from products.models import Product, User
+from products.models import Product
+
+User = get_user_model()
 
 
 class RatingStar(models.Model):
